@@ -4,7 +4,7 @@ import Row from "react-bootstrap/Row";
 import Col from "react-bootstrap/Col";
 
 import logger from "use-reducer-logger";
-import Products from "./components/Products";
+import Products from "../components/Products";
 
 const reducer = (state, action) => {
   switch (action.type) {
@@ -44,7 +44,7 @@ export default function HomeScreen() {
       dispach({ type: "FETCH_REQUEST" });
       try {
         const response = await axios.get("http://localhost:8000/api/products");
-        dispach({ type: "FETCH_SUCCESS", payload: response.data.products });
+        dispach({ type: "FETCH_SUCCESS", payload: response.data });
       } catch (error) {
         dispach({ type: "FETCH_ERROR" });
         console.error("Error fetching data:", error);

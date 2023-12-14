@@ -29,3 +29,6 @@ main {
   background-color: #ffc000;
   color: #000;
 }
+.img-large {
+  max-width: 100%;
+}

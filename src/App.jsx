@@ -1,18 +1,22 @@
 import React from "react";
 import "./App.css";
 import { BrowserRouter, Routes, Route, Link } from "react-router-dom";
-import HomeScreen from "./HomeScreen";
-import ProductScreen from "./ProductScreen";
+import HomeScreen from "./screens/HomeScreen";
+import ProductScreen from "./screens/ProductScreen";
 import Navbar from "react-bootstrap/Navbar";
 import Nav from "react-bootstrap/Nav";
 import Container from "react-bootstrap/Container";
 import { LinkContainer } from "react-router-bootstrap";
+import { Helmet } from "react-helmet-async";
 function App() {
   return (
     <>
       <BrowserRouter>
         <div className="d-flex flex-column site-container">
           <header>
+            <Helmet>
+              <title>Amazona</title>
+            </Helmet>
             <Navbar bg="dark" variant="dark">
               <Container>
                 <Nav className="ml-auto">
@@ -33,7 +37,7 @@ function App() {
               </Container>
             </Navbar>
           </header>
-          <main>
+          <main className="mt-3">
             <Container>
               <Routes>
                 <Route path="/product/:slug" element={<ProductScreen />} />
