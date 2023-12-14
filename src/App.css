@@ -1,26 +1,13 @@
-header {
-  background-color: #282c34;
-  min-height: 10vh;
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-  justify-content: flex-start;
-  font-size: calc(10px + 2vmin);
-  color: white;
-}
-
-header a {
-  color: #61dafb;
-  text-decoration: none;
-}
-
 .products {
   display: flex;
   flex-wrap: wrap;
   justify-content: center;
 }
 main {
-  margin: 1rem;
+  flex: 1;
+}
+.site-container {
+  min-height: 100vh;
 }
 
 .product {
@@ -30,8 +17,15 @@ main {
 
 .product img {
   width: 100%;
-  max-width: 230px;
+  max-width: 400px;
 }
 .product-info {
   padding: 1rem;
+}
+.rating span {
+  color: #ffc000;
+}
+.btn-primary {
+  background-color: #ffc000;
+  color: #000;
 }
