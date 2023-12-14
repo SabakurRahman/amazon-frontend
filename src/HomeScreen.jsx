@@ -56,13 +56,14 @@ export default function HomeScreen() {
   return (
     <>
       <h1>Feature Product</h1>
-      {loading ? (
-        <div>Loading...</div>
-      ) : error ? (
-        <div>{error}</div>
-      ) : (
-        <div className="products">
-          {products.map((product) => (
+
+      <div className="products">
+        {loading ? (
+          <div>Loading...</div>
+        ) : error ? (
+          <div>{error}</div>
+        ) : (
+          products.map((product) => (
             <div className="product" key={product.slug}>
               <Link to={`/product/${product.slug}`}>
                 <img src={product.image} alt={product.name} />
@@ -77,9 +78,9 @@ export default function HomeScreen() {
                 <button>Add to Cart</button>
               </div>
             </div>
-          ))}
-        </div>
-      )}
+          ))
+        )}
+      </div>
     </>
   );
 }
