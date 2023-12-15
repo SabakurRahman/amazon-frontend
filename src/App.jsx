@@ -32,7 +32,7 @@ function App() {
                       <i className="fas fa-shopping-cart"></i> Cart{" "}
                       {cart.cartItems.length > 0 && (
                         <Badge pill bg="danger">
-                          {cart.cartItems.length}
+                          {cart.cartItems.reduce((a, c) => a + c.qty, 0)}
                         </Badge>
                       )}
                     </Nav.Link>
