@@ -1,4 +1,4 @@
-import React, { useEffect, useReducer } from "react";
+import React, { useContext, useEffect, useReducer } from "react";
 import { useParams } from "react-router-dom";
 import axios from "axios";
 import Row from "react-bootstrap/Row";
@@ -8,6 +8,10 @@ import Rating from "../components/Rating";
 import Card from "react-bootstrap/Card";
 import Badge from "react-bootstrap/Badge";
 import { Helmet } from "react-helmet-async";
+import LoadingBox from "../components/LoadingBox";
+import MessageBox from "../components/MessageBox";
+import { getErrorMessage } from "../util";
+import { Store } from "../Store";
 
 const reducer = (state, action) => {
   switch (action.type) {
@@ -18,15 +22,16 @@ const reducer = (state, action) => {
       };
     case "FETCH_SUCCESS":
       return {
+        ...state,
         loading: false,
         product: action.payload,
         error: "",
       };
     case "FETCH_ERROR":
       return {
+        ...state,
         loading: false,
-        product: [],
-        error: "Something went wrong!",
+        error: action.payload,
       };
     default:
       return state;
@@ -52,17 +57,28 @@ export default function ProductScreen() {
         );
         dispach({ type: "FETCH_SUCCESS", payload: response.data });
       } catch (error) {
-        dispach({ type: "FETCH_ERROR" });
+        dispach({ type: "FETCH_ERROR", payload: getErrorMessage(error) });
         console.error("Error fetching data:", error);
       }
     };
     fetchData();
   }, [slug]);
 
+  const { state, dispatch } = useContext(Store);
+  const addToCartHandler = () => {
+    dispatch({
+      type: "CART_ADD_ITEM",
+      payload: {
+        ...product,
+        qty: 1,
+      },
+    });
+  };
+
   return loading ? (
-    <div>Loading...</div>
+    <LoadingBox />
   ) : error ? (
-    <div>{error}</div>
+    <MessageBox variant="danger">{error}</MessageBox>
   ) : (
     <div>
       <Row>
@@ -121,6 +137,7 @@ export default function ProductScreen() {
                   <ListGroup.Item>
                     <button
                       className="btn btn-primary btn-block"
+                      onClick={addToCartHandler}
                       disabled={product.countInStock === 0}
                     >
                       Add To Cart
