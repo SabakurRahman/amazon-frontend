@@ -4,3 +4,11 @@
   padding-left: 25px;
   padding-right: 25px;
 }
+.checkout-steps > div {
+  border-bottom: 0.2rem solid #c0c0c0;
+  color: #a0a0a0;
+}
+.checkout-steps > div.active {
+  border-bottom-color: #ffc000;
+  color: #ffc000;
+}

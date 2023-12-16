@@ -12,13 +12,24 @@ import { Store } from "./Store";
 import Badge from "react-bootstrap/Badge";
 import CartScreen from "./screens/CartScreen";
 import SigninScreen from "./screens/SigninScreen";
+import NavDropdown from "react-bootstrap/NavDropdown";
+import { ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+import ShippingAddressScreen from "./screens/ShippingAddressScreen";
+
 function App() {
-  const { state } = useContext(Store);
-  const { cart } = state;
+  const { state, dispatch } = useContext(Store);
+  const { cart, userInfo } = state;
+  const logoutHandler = () => {
+    dispatch({ type: "USER_LOGOUT" });
+    localStorage.removeItem("userInfo");
+    console.log("logout");
+  };
   return (
     <>
       <BrowserRouter>
         <div className="d-flex flex-column site-container">
+          <ToastContainer position="bottom-center" limit={1} />
           <header>
             <Helmet>
               <title>Amazona</title>
@@ -39,11 +50,25 @@ function App() {
                       )}
                     </Nav.Link>
                   </LinkContainer>
-                  <LinkContainer to="/signin">
-                    <Nav.Link>
-                      <i className="fas fa-user"></i> Sign In
-                    </Nav.Link>
-                  </LinkContainer>
+                  {userInfo ? (
+                    <NavDropdown title={userInfo.user.name} id="username">
+                      <LinkContainer to="/profile">
+                        <NavDropdown.Item>Profile</NavDropdown.Item>
+                      </LinkContainer>
+                      <LinkContainer to="/orderhistory">
+                        <NavDropdown.Item>Order History</NavDropdown.Item>
+                      </LinkContainer>
+                      <NavDropdown.Item onClick={logoutHandler}>
+                        Logout
+                      </NavDropdown.Item>
+                    </NavDropdown>
+                  ) : (
+                    <LinkContainer to="/signin">
+                      <Nav.Link>
+                        <i className="fas fa-user"></i> Sign In
+                      </Nav.Link>
+                    </LinkContainer>
+                  )}
                 </Nav>
               </Container>
             </Navbar>
@@ -54,6 +79,7 @@ function App() {
                 <Route path="/product/:slug" element={<ProductScreen />} />
                 <Route path="/" element={<HomeScreen />} />
                 <Route path="/cart" element={<CartScreen />} />
+                <Route path="/shipping" element={<ShippingAddressScreen />} />
                 <Route path="/signin" element={<SigninScreen />} />
               </Routes>
             </Container>
