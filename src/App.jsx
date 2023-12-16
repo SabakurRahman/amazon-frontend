@@ -11,6 +11,7 @@ import { Helmet } from "react-helmet-async";
 import { Store } from "./Store";
 import Badge from "react-bootstrap/Badge";
 import CartScreen from "./screens/CartScreen";
+import SigninScreen from "./screens/SigninScreen";
 function App() {
   const { state } = useContext(Store);
   const { cart } = state;
@@ -53,6 +54,7 @@ function App() {
                 <Route path="/product/:slug" element={<ProductScreen />} />
                 <Route path="/" element={<HomeScreen />} />
                 <Route path="/cart" element={<CartScreen />} />
+                <Route path="/signin" element={<SigninScreen />} />
               </Routes>
             </Container>
           </main>
