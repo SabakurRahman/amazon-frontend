@@ -16,6 +16,9 @@ import NavDropdown from "react-bootstrap/NavDropdown";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import ShippingAddressScreen from "./screens/ShippingAddressScreen";
+import SignupScreen from "./screens/SignupScreen";
+import PaymentMethodScreen from "./screens/PaymentMethodScreen";
+import PlaceOrderScreen from "./screens/PlaceOrderScreen";
 
 function App() {
   const { state, dispatch } = useContext(Store);
@@ -23,6 +26,10 @@ function App() {
   const logoutHandler = () => {
     dispatch({ type: "USER_LOGOUT" });
     localStorage.removeItem("userInfo");
+    localStorage.removeItem("cartItems");
+    localStorage.removeItem("shippingAddress");
+    localStorage.removeItem("paymentMethod");
+
     console.log("logout");
   };
   return (
@@ -81,6 +88,12 @@ function App() {
                 <Route path="/cart" element={<CartScreen />} />
                 <Route path="/shipping" element={<ShippingAddressScreen />} />
                 <Route path="/signin" element={<SigninScreen />} />
+                <Route path="/signup" element={<SignupScreen />} />
+                <Route path="/placeorder" element={<PlaceOrderScreen />} />
+                <Route
+                  path="/payment"
+                  element={<PaymentMethodScreen />}
+                ></Route>
               </Routes>
             </Container>
           </main>
