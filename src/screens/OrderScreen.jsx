@@ -13,6 +13,9 @@ import Image from "react-bootstrap/Image";
 import Card from "react-bootstrap/Card";
 import Button from "react-bootstrap/Button";
 import { Link } from "react-router-dom";
+import { usePayPalScriptReducer } from "@paypal/react-paypal-js";
+import { toast } from "react-toastify";
+import { PayPalButtons } from "@paypal/react-paypal-js";
 
 const reducer = (state, action) => {
   switch (action.type) {
@@ -22,6 +25,15 @@ const reducer = (state, action) => {
       return { ...state, loading: false, order: action.payload, error: "" };
     case "FAIL":
       return { ...state, loading: false, error: action.payload };
+    case "PAY_REQUEST":
+      return { ...state, loadingPay: true };
+    case "PAY_SUCCESS":
+      return { ...state, loadingPay: false, successPay: true };
+    case "PAY_FAIL":
+      return { ...state, loadingPay: false };
+    case "PAY_RESET":
+      return { ...state, loadingPay: false, successPay: false };
+
     default:
       return state;
   }
@@ -30,49 +42,71 @@ export default function OrderScreen() {
   const { state } = useContext(Store);
   const { userInfo } = state;
   const navigate = useNavigate();
-  const param = useParams();
-  const { id } = param;
-  console.log(id);
-  const [{ loading, error, order }, dispatchs] = useReducer(reducer, {
-    loading: true,
-    order: {},
-    error: "",
-  });
+  const params = useParams();
+  const { id: orderId } = params;
+  console.log(orderId);
+  const [{ loading, error, order, successPay, loadingPay }, dispatch] =
+    useReducer(reducer, {
+      loading: true,
+      order: {},
+      error: "",
+      successPay: false,
+      loadingPay: false,
+    });
+  const [{ isPending }, paypalDispatch] = usePayPalScriptReducer();
 
-  const payOrderHandler = async () => {
-    const response = await axios.post(
-      `http://localhost:8000/api/create-payment`,
-      {
-        headers: {
-          "Content-Type": "application/json",
-          // Add other headers as needed
-        },
-        body: JSON.stringify({
-          amount: 100, // Replace with the actual amount
-          name: "John Doe", // Replace with the actual customer name
-        }),
+  function createOrder(data, actions) {
+    return actions.order
+      .create({
+        purchase_units: [
+          {
+            amount: { value: order.order.total_price },
+          },
+        ],
+      })
+      .then((orderID) => {
+        return orderID;
+      });
+  }
+
+  function onApprove(data, actions) {
+    return actions.order.capture().then(async function (details) {
+      try {
+        dispatch({ type: "PAY_REQUEST" });
+        const { data } = await axios.put(
+          `http://localhost:8000/api/orders/${orderId}/pay`,
+          details,
+          {
+            headers: { authorization: `Bearer ${userInfo.token}` },
+          }
+        );
+        dispatch({ type: "PAY_SUCCESS", payload: data });
+        toast.success("Order is paid");
+      } catch (err) {
+        dispatch({ type: "PAY_FAIL", payload: getErrorMessage(err) });
+        toast.error(getErrorMessage(err));
       }
-    );
-
-    const data = await response.json();
-    console.log(data);
-  };
+    });
+  }
+  function onError(err) {
+    toast.error(getErrorMessage(err));
+  }
 
   useEffect(() => {
     const fetchOrder = async () => {
       try {
-        dispatchs({ type: "REQUEST" });
+        dispatch({ type: "REQUEST" });
         const { data } = await axios.get(
-          `http://localhost:8000/api/order/${id}`,
+          `http://localhost:8000/api/order/${orderId}`,
           {
             headers: {
               Authorization: `Bearer ${userInfo.token}`,
             },
           }
         );
-        dispatchs({ type: "SUCCESS", payload: data });
+        dispatch({ type: "SUCCESS", payload: data });
       } catch (err) {
-        dispatchs({
+        dispatch({
           type: "FAIL",
           payload: getErrorMessage(err),
         });
@@ -81,10 +115,32 @@ export default function OrderScreen() {
     if (!userInfo) {
       navigate("/signin");
     }
-    if (!order.id || (order.id && order.id !== id)) {
+    if (!order.id || successPay || (order.id && order.id !== orderId)) {
       fetchOrder();
+      if (successPay) {
+        dispatch({ type: "PAY_RESET" });
+      }
+    } else {
+      alert("Order not found");
+      const loadPaypalScript = async () => {
+        const { data: clientId } = await axios.get(
+          "http://localhost:8000/api/key/paypal",
+          {
+            headers: { authorization: `Bearer ${userInfo.token}` },
+          }
+        );
+        paypalDispatch({
+          type: "resetOptions",
+          value: {
+            "client-id": clientId.paypalSecretKey,
+            currency: "USD",
+          },
+        });
+        paypalDispatch({ type: "setLoadingStatus", value: "pending" });
+      };
+      loadPaypalScript();
     }
-  }, [userInfo, id, navigate]);
+  }, [userInfo, orderId, navigate, paypalDispatch, successPay]);
 
   return loading ? (
     <LoadingBox></LoadingBox>
@@ -208,16 +264,21 @@ export default function OrderScreen() {
               <ListGroup.Item>
                 {loading && <LoadingBox></LoadingBox>}
               </ListGroup.Item>
-              {!order.order.payment_status ? (
-                <Button
-                  type="button"
-                  className="btn-block"
-                  onClick={payOrderHandler}
-                >
-                  Pay Now
-                </Button>
-              ) : (
-                ""
+              {!order.order.payment_status && (
+                <ListGroup.Item>
+                  {loading ? (
+                    <LoadingBox />
+                  ) : (
+                    <div>
+                      <PayPalButtons
+                        createOrder={createOrder}
+                        onApprove={onApprove}
+                        onError={onError}
+                      ></PayPalButtons>
+                    </div>
+                  )}
+                  {loadingPay && <LoadingBox></LoadingBox>}
+                </ListGroup.Item>
               )}
             </ListGroup>
           </Card>
