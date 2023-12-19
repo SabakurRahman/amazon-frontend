@@ -20,6 +20,8 @@ import SignupScreen from "./screens/SignupScreen";
 import PaymentMethodScreen from "./screens/PaymentMethodScreen";
 import PlaceOrderScreen from "./screens/PlaceOrderScreen";
 import OrderScreen from "./screens/OrderScreen";
+import OrderHistoryScreen from "./screens/OrderHistoryScreen";
+import ProfileScreen from "./screens/ProfileScreen";
 
 function App() {
   const { state, dispatch } = useContext(Store);
@@ -42,12 +44,14 @@ function App() {
             <Helmet>
               <title>Amazona</title>
             </Helmet>
+
             <Navbar bg="dark" variant="dark">
               <Container>
+                <LinkContainer to="/">
+                  <Navbar.Brand>amazona</Navbar.Brand>
+                </LinkContainer>
+
                 <Nav className="ml-auto">
-                  <LinkContainer to="/">
-                    <Navbar.Brand>amazona</Navbar.Brand>
-                  </LinkContainer>
                   <LinkContainer to="/cart">
                     <Nav.Link>
                       <i className="fas fa-shopping-cart"></i> Cart{" "}
@@ -89,9 +93,10 @@ function App() {
                 <Route path="/cart" element={<CartScreen />} />
                 <Route path="/shipping" element={<ShippingAddressScreen />} />
                 <Route path="/signin" element={<SigninScreen />} />
-                <Route path="/signup" element={<SignupScreen />} />
                 <Route path="/placeorder" element={<PlaceOrderScreen />} />
                 <Route path="/order/:id" element={<OrderScreen />} />
+                <Route path="/orderhistory" element={<OrderHistoryScreen />} />
+                <Route path="/profile" element={<ProfileScreen />} />
                 <Route
                   path="/payment"
                   element={<PaymentMethodScreen />}
